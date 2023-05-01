@@ -10,6 +10,9 @@ module.exports = {
   },
   plugins: [
     require('flowbite/plugin')
+  ],
+  safelist: [
+    'md:grid-cols-2',
   ]
 }
 
