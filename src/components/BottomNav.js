@@ -208,7 +208,7 @@ function AddCameraButton() {
     }))
 
     setDevices([...devices]);
-  }, [setDevices]);
+  }, [setDevices, webcamsDispatch]);
 
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then(handleDevices);

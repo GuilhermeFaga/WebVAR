@@ -128,7 +128,7 @@ function VideoComponent({ id }) {
         }}
         progressInterval={10} />
     )
-  }, [webcamRef, recordedChunks, webcamsState])
+  }, [webcamRef, recordedChunks, webcamsState, playerRef])
 
 
   return (
