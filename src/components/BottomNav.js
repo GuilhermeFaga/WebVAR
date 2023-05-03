@@ -1,10 +1,11 @@
-import { PlayIcon } from "icons"
-import { ForwardIcon, PauseIcon, FastForwardIcon, BackwardIcon, FastBackwardIcon, CameraIcon, StopIcon } from "../icons"
-import RoundButton from "./RoundButton"
+import { WebcamsDispatchContext } from "contexts/WebcamsContext"
+import { PlayIcon, PlusIcon } from "icons"
+import { useCallback, useContext, useEffect, useState } from "react"
 import GlobalController from "../GlobalController"
-import { useContext, useEffect, useState } from "react"
 import { RecordingContext, RecordingDispatchContext } from "../contexts/RecordingContext"
+import { BackwardIcon, CameraIcon, FastBackwardIcon, FastForwardIcon, ForwardIcon, PauseIcon, StopIcon } from "../icons"
 import ProgressBar from "./ProgressBar"
+import RoundButton from "./RoundButton"
 
 
 export default function BottomNav() {
@@ -15,6 +16,7 @@ export default function BottomNav() {
 
         <div className="w-full items-center justify-end hidden mr-auto text-gray-500 dark:text-gray-400 md:flex">
           <RecordButton />
+          <AddCameraButton />
         </div>
 
         <div className="flex items-center justify-center mx-auto">
@@ -153,5 +155,68 @@ function RecordButton() {
         </RoundButton>
       }
     </>
+  )
+}
+
+function CameraList({ devices, open }) {
+  let topClassName = "w-full px-4 py-2 font-medium text-left text-white bg-blue-700 cursor-default border-b border-gray-200 rounded-t-lg dark:bg-gray-800 dark:border-gray-600"
+  let middleClassName = "w-full px-4 py-2 font-medium text-left border-b border-gray-200 cursor-pointer hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"
+  let bottomClassName = "w-full px-4 py-2 font-medium text-left border-b border-gray-200 rounded-b-lg cursor-pointer hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"
+
+  return (
+    <dialog open={open} className="bg-transparent bottom-[42px] left-[-16px]">
+      <div className="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <div className={topClassName}>Adicionar câmera</div>
+        {devices.map((device, index) => (
+          <button onClick={device.onClick} aria-current="true" type="button" className={index === devices.length - 1 ? bottomClassName : middleClassName}>
+            {device.label}
+          </button>
+        ))}
+      </div>
+    </dialog>
+  )
+}
+
+function AddCameraButton() {
+  const [open, setOpen] = useState(false)
+  const [devices, setDevices] = useState([])
+
+  const webcamsDispatch = useContext(WebcamsDispatchContext)
+
+  const handleDevices = useCallback(mediaDevices => {
+    let videoinputs = mediaDevices.filter(({ kind }) => kind === "videoinput")
+
+    let devices = videoinputs.map((device) => ({
+      deviceId: device.deviceId,
+      label: device.label,
+      onClick: () => {
+        webcamsDispatch({
+          type: "addWebcam",
+          value: {
+            id: device.deviceId,
+            label: device.label
+          }
+        })
+        setOpen(false)
+      }
+    }))
+
+    setDevices([...devices]);
+  }, [setDevices]);
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then(handleDevices);
+  }, [handleDevices])
+
+
+  return (
+    <div className="relative">
+      <CameraList open={open} devices={devices} />
+      <RoundButton onClick={() => {
+        setOpen(!open)
+      }}>
+        <PlusIcon />
+      </RoundButton>
+    </div>
   )
 }

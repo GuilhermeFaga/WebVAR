@@ -7,29 +7,33 @@ import Card from 'components/Card';
 import GlobalController from './GlobalController';
 import { RecordingContext, RecordingDispatchContext } from 'contexts/RecordingContext';
 import { recordingReducer } from 'contexts/RecordingReducer';
+import { WebcamsContext, WebcamsDispatchContext } from 'contexts/WebcamsContext';
+import { webcamsReducer } from 'contexts/WebcamsReducer';
 
 
 export default function App() {
-  const [recordingState, dispatch] = useReducer(recordingReducer, -1);
+  const [recordingState, recordingDispatch] = useReducer(recordingReducer, -1);
+  const [webcamsState, webcamsDispatch] = useReducer(webcamsReducer, []);
 
-  const components = [
-    <VideoComponent key={111111} id={1} />,
-    <VideoComponent key={222222} id={2} />,
-    <VideoComponent key={32222} id={3} />
-  ]
+  const webcams = webcamsState.map((webcam) => <VideoComponent id={webcam.id} />)
 
-  var cl = components.length;
+  var cl = webcams.length;
+
+  console.log(webcamsState)
 
   return (
-    <RecordingContext.Provider value={recordingState}>
-      <RecordingDispatchContext.Provider value={dispatch}>
-        <div
-          className={`video-grid bg-white dark:bg-gray-900 grid grid-flow-row grid-cols-1 md:grid-cols-${cl === 1 ? "1" : "2"} auto-rows-auto gap-2 p-2 h-full`}>
-          {components}
-        </div>
-        <BottomNav />
-      </RecordingDispatchContext.Provider>
-    </RecordingContext.Provider>
+    <WebcamsContext.Provider value={webcamsState}>
+      <WebcamsDispatchContext.Provider value={webcamsDispatch}>
+        <RecordingContext.Provider value={recordingState}>
+          <RecordingDispatchContext.Provider value={recordingDispatch}>
+            <div className={`video-grid bg-white dark:bg-gray-900 grid grid-flow-row grid-cols-1 md:grid-cols-${cl === 1 ? "1" : "2"} auto-rows-auto gap-2 p-2 h-full`}>
+              {webcams}
+            </div>
+            <BottomNav />
+          </RecordingDispatchContext.Provider>
+        </RecordingContext.Provider>
+      </WebcamsDispatchContext.Provider>
+    </WebcamsContext.Provider>
   );
 }
 
@@ -112,6 +116,7 @@ function VideoComponent({ id }) {
 
           <Webcam
             className='w-full aspect-video'
+            videoConstraints={{ deviceId: id }}
             ref={webcamRef}
             audio={false} />
 
