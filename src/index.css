@@ -20,3 +20,7 @@ code {
 #root {
   height: 100%;
 }
+
+.react-player video {
+  object-fit: cover;
+}

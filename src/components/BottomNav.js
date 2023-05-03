@@ -1,4 +1,4 @@
-import { WebcamsDispatchContext } from "contexts/WebcamsContext"
+import { WebcamsContext, WebcamsDispatchContext } from "contexts/WebcamsContext"
 import { PlayIcon, PlusIcon } from "icons"
 import { useCallback, useContext, useEffect, useState } from "react"
 import GlobalController from "../GlobalController"
@@ -128,11 +128,12 @@ function FastBackwardButton() {
 function RecordButton() {
   const recordingState = useContext(RecordingContext);
   const recordingDispatch = useContext(RecordingDispatchContext)
+  const webcamsState = useContext(WebcamsContext)
 
   return (
     <>
       {recordingState <= 0 ?
-        <RoundButton className="bg-green-600 dark:bg-green-500 hover:bg-green-800 dark:hover:bg-green-700"
+        <RoundButton disabled={!webcamsState.length} className="bg-green-600 dark:bg-green-500 hover:bg-green-800 dark:hover:bg-green-700 disabled:hover:bg-green-600 disabled:cursor-default disabled:dark:hover:bg-green-500 "
           onClick={() => {
             const controller = GlobalController.getInstance();
             controller.reset()
@@ -168,10 +169,15 @@ function CameraList({ devices, open }) {
       <div className="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
         <div className={topClassName}>Adicionar câmera</div>
         {devices.map((device, index) => (
-          <button onClick={device.onClick} aria-current="true" type="button" className={index === devices.length - 1 ? bottomClassName : middleClassName}>
+          <button key={`cameralistitem-${index}`} onClick={device.onClick} aria-current="true" type="button" className={index === devices.length - 1 ? bottomClassName : middleClassName}>
             {device.label}
           </button>
         ))}
+        {devices.length === 0 && (
+          <div className="w-full px-4 py-2 text-red-600 dark:text-red-400 font-medium text-left border-gray-200 rounded-b-lg cursor-default">
+            Nenhuma câmera encontrada
+          </div>
+        )}
       </div>
     </dialog>
   )
@@ -214,7 +220,7 @@ function AddCameraButton() {
       <CameraList open={open} devices={devices} />
       <RoundButton onClick={() => {
         setOpen(!open)
-      }}>
+      }} className={open ? "bg-gray-200 dark:bg-gray-800" : ""}>
         <PlusIcon />
       </RoundButton>
     </div>

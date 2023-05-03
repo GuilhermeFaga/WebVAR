@@ -9,17 +9,16 @@ import { RecordingContext, RecordingDispatchContext } from 'contexts/RecordingCo
 import { recordingReducer } from 'contexts/RecordingReducer';
 import { WebcamsContext, WebcamsDispatchContext } from 'contexts/WebcamsContext';
 import { webcamsReducer } from 'contexts/WebcamsReducer';
+import RoundButton from 'components/RoundButton';
+import { CloseIcon } from 'icons';
 
 
 export default function App() {
   const [recordingState, recordingDispatch] = useReducer(recordingReducer, -1);
   const [webcamsState, webcamsDispatch] = useReducer(webcamsReducer, []);
 
-  const webcams = webcamsState.map((webcam) => <VideoComponent id={webcam.id} />)
-
+  const webcams = webcamsState.map((webcam) => <VideoComponent key={webcam.id} id={webcam.id} />)
   var cl = webcams.length;
-
-  console.log(webcamsState)
 
   return (
     <WebcamsContext.Provider value={webcamsState}>
@@ -64,8 +63,11 @@ function VideoComponent({ id }) {
   const mediaRecorderRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
   const [recordedChunks, setRecordedChunks] = useState([]);
+  const [playerComponent, setPlayerComponent] = useState(null);
 
   const recordingState = useContext(RecordingContext);
+  const webcamsState = useContext(WebcamsContext);
+  const webcamsDispatch = useContext(WebcamsDispatchContext);
 
   const [playerRef] = useHookWithRefCallback((node) => {
     const controller = GlobalController.getInstance();
@@ -108,36 +110,47 @@ function VideoComponent({ id }) {
   }, [recordingState, capturing, handleStartCaptureClick, handleStopCaptureClick])
 
 
-  return (
+  useEffect(() => {
+    setPlayerComponent(
+      <ReactPlayer
+        className='react-player absolute h-inherit w-inherit top-0 left-0'
+        ref={playerRef}
+        height={webcamRef.current?.video.clientHeight}
+        width={webcamRef.current?.video.clientWidth}
+        url={URL.createObjectURL(new Blob(recordedChunks))}
+        onEnded={() => {
+          const controller = GlobalController.getInstance();
+          controller.onEnded()
+        }}
+        onProgress={(progress) => {
+          const controller = GlobalController.getInstance();
+          controller.onProgress(progress.played)
+        }}
+        progressInterval={10} />
+    )
+  }, [webcamRef, recordedChunks, webcamsState])
 
-    <div className='w-full flex items-center col-span-1 overflow-hidden'>
-      <div className='w-full h-fit'>
+
+  return (
+    <div className='w-full max-h-fit flex items-center col-span-1 overflow-hidden'>
+      <div className='flex items-center w-full max-h-fit h-full'>
         <Card>
 
           <Webcam
-            className='w-full aspect-video'
+            className='w-full aspect-video object-cover'
             videoConstraints={{ deviceId: id }}
             ref={webcamRef}
             audio={false} />
 
-          {recordedChunks.length > 0 && (
-            <ReactPlayer
-              className='absolute h-inherit w-inherit top-0 left-0'
-              ref={playerRef}
-              height={webcamRef?.current.video.clientHeight}
-              width={webcamRef?.current.video.clientWidth}
-              url={URL.createObjectURL(new Blob(recordedChunks))}
-              onEnded={() => {
-                const controller = GlobalController.getInstance();
-                controller.onEnded()
-              }}
-              onProgress={(progress) => {
-                const controller = GlobalController.getInstance();
-                controller.onProgress(progress.played)
-              }}
-              progressInterval={10} />
+          {recordedChunks.length > 0 && playerComponent}
+          {!capturing && (
+            <RoundButton className="absolute hidden group-hover:block top-0 right-0 mt-1 mr-1 bg-red-300 hover:bg-red-400 dark:bg-red-500 dark:hover:bg-red-600 text-black"
+              onClick={() => {
+                webcamsDispatch({ type: 'removeWebcam', value: id })
+              }}>
+              <CloseIcon />
+            </RoundButton>
           )}
-
         </Card>
       </div>
     </div>
