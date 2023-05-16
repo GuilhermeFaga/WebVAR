@@ -12,14 +12,18 @@ export default function BottomNav() {
   return (
     <>
       <ProgressBar />
-      <div className="fixed bottom-0 left-0 z-50 grid w-full h-16 grid-cols-1 px-8 bg-white border-t border-gray-200 md:grid-cols-3 dark:bg-gray-700 dark:border-gray-600">
+      <div className="fixed bottom-0 left-0 z-50 grid w-full h-16 grid-cols-1 px-0 md:px-8 bg-white border-t border-gray-200 md:grid-cols-3 dark:bg-gray-700 dark:border-gray-600">
 
-        <div className="w-full items-center justify-end hidden mr-auto text-gray-500 dark:text-gray-400 md:flex">
+        <div className="w-full items-center justify-end hidden mr-auto md:gap-4 text-gray-500 dark:text-gray-400 md:flex">
           <RecordButton />
           <AddCameraButton />
         </div>
 
-        <div className="flex items-center justify-center mx-auto">
+        <div className="flex items-center justify-center mx-auto gap-2 md:gap-4">
+          <div className="flex md:hidden gap-2">
+            <RecordButton />
+            <AddCameraButton />
+          </div>
           <FastBackwardButton />
           <BackwardButton />
           <PlayPauseButton />

@@ -128,14 +128,14 @@ function VideoComponent({ id }) {
         }}
         progressInterval={10} />
     )
-  }, [webcamRef, recordedChunks, webcamsState, playerRef])
+    // eslint-disable-next-line
+  }, [webcamRef, recordedChunks, webcamsState])
 
 
   return (
     <div className='w-full max-h-fit flex items-center col-span-1 overflow-hidden'>
       <div className='flex items-center w-full max-h-fit h-full'>
         <Card>
-
           <Webcam
             className='w-full aspect-video object-cover'
             videoConstraints={{ deviceId: id }}
